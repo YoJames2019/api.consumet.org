@@ -314,6 +314,7 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
       const episodeId = (request.params as { episodeId: string }).episodeId;
       const provider = (request.query as { provider?: string }).provider;
       const server = (request.query as { server?: StreamingServers }).server;
+      const category = (request.query as { category?: 'sub' | 'dub' | 'raw' | 'both' }).category;
 
       let anilist = generateAnilistMeta(provider);
 
@@ -324,12 +325,12 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
               .send(
                 await cache.fetch(
                   redis,
-                  `anilist:watch;${episodeId};${anilist.provider.name.toLowerCase()};${server}`,
-                  async () => anilist.fetchEpisodeSources(episodeId, server),
+                  `anilist:watch;${episodeId};${anilist.provider.name.toLowerCase()};${server};${category}`,
+                  async () => anilist.fetchEpisodeSources(episodeId, server, category),
                   600,
                 ),
               )
-          : reply.status(200).send(await anilist.fetchEpisodeSources(episodeId, server));
+          : reply.status(200).send(await anilist.fetchEpisodeSources(episodeId, server, category));
 
         anilist = new META.Anilist(undefined, {
           url: process.env.PROXY as string | string[],
