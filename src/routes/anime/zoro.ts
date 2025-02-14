@@ -140,6 +140,38 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
         .send({ message: 'Something went wrong. Contact developer for help.' });
     }
   });
+
+  const episodeServers = async (request: FastifyRequest, reply: FastifyReply) => {
+    let episodeId = (request.params as { episodeId: string }).episodeId;
+    if(!episodeId){
+      episodeId = (request.query as { episodeId: string }).episodeId;
+    }
+
+    const type = (request.query as { type: "sub" | "dub" | "raw"}).type || "sub";
+
+    if(typeof episodeId === 'undefined')
+      return reply.status(400).send({ message: 'id is required' })
+
+    if(!["sub", "dub", "raw"].includes(type)){
+      return reply.status(400).send({ message: 'type param must be one of "sub", "dub", or "raw"' })
+    }
+    try {
+      const res = await zoro
+        .fetchEpisodeServers(episodeId, type)
+        .catch((err) => reply.status(404).send({ message: err }))
+
+      return reply.status(200).send(res);
+    }
+    catch (err) {
+      reply
+        .status(500)
+        .send({ message: 'Something went wrong. Contact developer for help.'})
+    }
+  }
+
+  fastify.get("/episode-servers", episodeServers)
+  fastify.get("/episode-servers/:episodeId", episodeServers)
+
   const watch = async (request: FastifyRequest, reply: FastifyReply) => {
     let episodeId = (request.params as { episodeId: string }).episodeId;
     if(!episodeId){
