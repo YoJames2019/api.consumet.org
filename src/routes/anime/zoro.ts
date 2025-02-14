@@ -178,17 +178,14 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
       episodeId = (request.query as { episodeId: string }).episodeId;
     }
 
-    const server = (request.query as { server: string }).server as StreamingServers;
-
-    if (server && !Object.values(StreamingServers).includes(server))
-      return reply.status(400).send({ message: 'server is invalid' });
+    const server = (request.query as { server: string }).server;
 
     if (typeof episodeId === 'undefined')
       return reply.status(400).send({ message: 'id is required' });
 
     try {
       const res = await zoro
-        .fetchEpisodeSources(episodeId, server)
+        .fetchEpisodeSources(episodeId, server as StreamingServers)
         .catch((err) => reply.status(404).send({ message: err }));
 
       reply.status(200).send(res);
