@@ -314,9 +314,6 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
       const provider = (request.query as { provider?: string }).provider;
       const server = (request.query as { server?: StreamingServers }).server;
 
-      if (server && !Object.values(StreamingServers).includes(server))
-        return reply.status(400).send('Invalid server');
-
       let anilist = generateAnilistMeta(provider);
 
       try {
