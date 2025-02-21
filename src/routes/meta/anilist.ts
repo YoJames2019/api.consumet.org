@@ -205,6 +205,30 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
     reply.status(200).send(res);
   });
 
+  fastify.get('/all-servers/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    const id = (request.params as { id: string }).id;
+    const provider = (request.query as { provider?: string }).provider;
+
+    if(provider && provider !== "zoro") return reply.status(500).send({message: "NOT IMPLEMENTED FOR PROVIDER"})
+
+    const zoro = new Zoro()
+    const res = await zoro.fetchAllEpisodeServers(id);
+
+    reply.status(200).send(res);
+  });
+
+  fastify.get('/all-sources/:id', async (request: FastifyRequest, reply: FastifyReply) => {
+    const id = (request.params as { id: string }).id;
+    const provider = (request.query as { provider?: string }).provider;
+
+    if(provider && provider !== "zoro") return reply.status(500).send({message: "NOT IMPLEMENTED FOR PROVIDER"})
+
+    const zoro = new Zoro()
+    const res = await zoro.fetchAllEpisodeSources(id);
+
+    reply.status(200).send(res);
+  });
+
   fastify.get('/episodes/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const today = new Date();
     const dayOfWeek = today.getDay();
