@@ -141,6 +141,58 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
     }
   });
 
+  const allEpisodeServers = async (request: FastifyRequest, reply: FastifyReply) => {
+    let episodeId = (request.params as { episodeId: string }).episodeId;
+    if(!episodeId){
+      episodeId = (request.query as { episodeId: string }).episodeId;
+    }
+
+    if(typeof episodeId === 'undefined')
+      return reply.status(400).send({ message: 'id is required' })
+
+    try {
+      const res = await zoro
+        .fetchAllEpisodeServers(episodeId)
+        .catch((err) => reply.status(404).send({ message: err }))
+
+      return reply.status(200).send(res);
+    }
+    catch (err) {
+      reply
+        .status(500)
+        .send({ message: 'Something went wrong. Contact developer for help.'})
+    }
+  }
+
+  fastify.get("/all-episode-servers", allEpisodeServers)
+  fastify.get("/all-episode-servers/:episodeId", allEpisodeServers)
+
+  const allEpisodeSources = async (request: FastifyRequest, reply: FastifyReply) => {
+    let episodeId = (request.params as { episodeId: string }).episodeId;
+    if(!episodeId){
+      episodeId = (request.query as { episodeId: string }).episodeId;
+    }
+
+    if(typeof episodeId === 'undefined')
+      return reply.status(400).send({ message: 'id is required' })
+
+    try {
+      const res = await zoro
+        .fetchAllEpisodeSources(episodeId)
+        .catch((err) => reply.status(404).send({ message: err }))
+
+      return reply.status(200).send(res);
+    }
+    catch (err) {
+      reply
+        .status(500)
+        .send({ message: 'Something went wrong. Contact developer for help.'})
+    }
+  }
+  
+  fastify.get("/all-episode-sources", allEpisodeSources)
+  fastify.get("/all-episode-sources/:episodeId", allEpisodeSources)
+
   const episodeServers = async (request: FastifyRequest, reply: FastifyReply) => {
     let episodeId = (request.params as { episodeId: string }).episodeId;
     if(!episodeId){
@@ -171,6 +223,7 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
 
   fastify.get("/episode-servers", episodeServers)
   fastify.get("/episode-servers/:episodeId", episodeServers)
+
 
   const watch = async (request: FastifyRequest, reply: FastifyReply) => {
     let episodeId = (request.params as { episodeId: string }).episodeId;
