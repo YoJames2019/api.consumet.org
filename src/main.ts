@@ -3,6 +3,7 @@ import Redis from 'ioredis';
 import Fastify from 'fastify';
 import FastifyCors from '@fastify/cors';
 import fs from 'fs';
+import path from 'path';
 
 import books from './routes/books';
 import anime from './routes/anime';
@@ -26,6 +27,10 @@ export const redis =
 const fastify = Fastify({
   maxParamLength: 1000,
   logger: true,
+  https: {
+    key: fs.readFileSync(path.join(__dirname, '..', 'certificates/cert-key.pem')),
+    cert: fs.readFileSync(path.join(__dirname, '..', 'certificates/cert.pem'))
+  }
 });
 export const tmdbApi = process.env.TMDB_KEY && process.env.TMDB_KEY;
 (async () => {
@@ -158,7 +163,11 @@ export const tmdbApi = process.env.TMDB_KEY && process.env.TMDB_KEY;
       });
     });
 
-    fastify.listen({ port: PORT, host: '0.0.0.0' }, (e, address) => {
+    const options = {
+      port: PORT,
+      host: '0.0.0.0',
+    };
+    fastify.listen(options, (e, address) => {
       if (e) throw e;
       console.log(`server listening on ${address}`);
     });
