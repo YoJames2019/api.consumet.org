@@ -130,18 +130,31 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
     async (request: FastifyRequest, reply: FastifyReply) => {
       const page = (request.query as { page: number }).page;
       const perPage = (request.query as { perPage: number }).perPage;
-      const weekStart = (request.query as { weekStart: number | string }).weekStart;
-      const weekEnd = (request.query as { weekEnd: number | string }).weekEnd;
+      let weekStart = (request.query as { weekStart: number | string }).weekStart;
+      let weekEnd = (request.query as { weekEnd: number | string }).weekEnd;
       const notYetAired = (request.query as { notYetAired: boolean }).notYetAired;
 
-       const anilist = generateAnilistMeta();
-      const _weekStart = Math.ceil(Date.now() / 1000);
+      const anilist = generateAnilistMeta();
+
+      const nowSec = Math.ceil(Date.now() / 1000)
+
+      const _weekStart = nowSec - 604800;
+
+      const isNumRegex = /^[0-9]+$/
+      
+      weekStart = weekStart ? (
+        isNumRegex.test(`${weekStart}`) ?  parseInt(`${weekStart}`) : weekStart
+      ) : _weekStart // 1 week
+
+      weekEnd = weekEnd ? (
+        isNumRegex.test(`${weekEnd}`) ?  parseInt(`${weekEnd}`) : weekEnd
+      ) : nowSec // 1 week
 
       const res = await anilist.fetchAiringSchedule(
         page ?? 1,
         perPage ?? 20,
-        weekStart ?? _weekStart,
-        weekEnd ?? _weekStart + 604800,
+        weekStart,
+        weekEnd,
         notYetAired ?? true,
       );
 
