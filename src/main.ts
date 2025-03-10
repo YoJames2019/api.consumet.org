@@ -27,10 +27,6 @@ export const redis =
 const fastify = Fastify({
   maxParamLength: 1000,
   logger: true,
-  https: {
-    key: fs.readFileSync(path.join(__dirname, '..', 'certificates/cert-key.pem')),
-    cert: fs.readFileSync(path.join(__dirname, '..', 'certificates/cert.pem'))
-  }
 });
 export const tmdbApi = process.env.TMDB_KEY && process.env.TMDB_KEY;
 (async () => {
