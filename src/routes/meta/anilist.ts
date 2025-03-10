@@ -144,18 +144,18 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
       
       weekStart = weekStart ? (
         isNumRegex.test(`${weekStart}`) ?  parseInt(`${weekStart}`) : weekStart
-      ) : _weekStart // 1 week
-
+      ) : _weekStart
+      
       weekEnd = weekEnd ? (
         isNumRegex.test(`${weekEnd}`) ?  parseInt(`${weekEnd}`) : weekEnd
-      ) : nowSec // 1 week
+      ) : nowSec 
 
       const res = await anilist.fetchAiringSchedule(
         page ?? 1,
         perPage ?? 20,
         weekStart,
         weekEnd,
-        notYetAired ?? true,
+        notYetAired ?? false,
       );
 
       reply.status(200).send(res);
