@@ -138,6 +138,44 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
 
       const nowSec = Math.ceil(Date.now() / 1000)
 
+      const _weekStart = nowSec;
+      const _weekEnd = nowSec + (7 * 24 * 60 * 60) // one week from start (seconds)
+
+      const isNumRegex = /^[0-9]+$/
+      
+      weekStart = weekStart ? (
+        isNumRegex.test(`${weekStart}`) ?  parseInt(`${weekStart}`) : weekStart
+      ) : _weekStart
+      
+      weekEnd = weekEnd ? (
+        isNumRegex.test(`${weekEnd}`) ?  parseInt(`${weekEnd}`) : weekEnd
+      ) : _weekEnd
+
+      const res = await anilist.fetchAiringSchedule(
+        page ?? 1,
+        perPage ?? 20,
+        weekStart,
+        weekEnd,
+        notYetAired ?? true,
+      );
+
+      reply.status(200).send(res);
+    },
+  );
+
+  fastify.get(
+    '/recent-episodes',
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const page = (request.query as { page: number }).page;
+      const perPage = (request.query as { perPage: number }).perPage;
+      let weekStart = (request.query as { weekStart: number | string }).weekStart;
+      let weekEnd = (request.query as { weekEnd: number | string }).weekEnd;
+      const notYetAired = (request.query as { notYetAired: boolean }).notYetAired;
+
+      const anilist = generateAnilistMeta();
+
+      const nowSec = Math.ceil(Date.now() / 1000)
+
       const _weekStart = nowSec - 604800;
 
       const isNumRegex = /^[0-9]+$/
@@ -183,28 +221,15 @@ const routes = async (fastify: FastifyInstance, options: RegisterOptions) => {
     reply.status(200).send(res);
   });
 
-  fastify.get(
-    '/recent-episodes',
-    async (request: FastifyRequest, reply: FastifyReply) => {
-      const provider = (request.query as { provider: 'gogoanime' | 'zoro' }).provider;
-      const page = (request.query as { page: number }).page;
-      const perPage = (request.query as { perPage: number }).perPage;
 
-      const anilist = generateAnilistMeta(provider);
+  fastify.get('/random-anime', async (request: FastifyRequest, reply: FastifyReply) => {
+    const anilist = generateAnilistMeta();
 
-      const res = await anilist.fetchRecentEpisodes(provider, page, perPage);
-
-      reply.status(200).send(res);
-    },
-  ),
-    fastify.get('/random-anime', async (request: FastifyRequest, reply: FastifyReply) => {
-      const anilist = generateAnilistMeta();
-
-      const res = await anilist.fetchRandomAnime().catch((err) => {
-        return reply.status(404).send({ message: 'Anime not found' });
-      });
-      reply.status(200).send(res);
+    const res = await anilist.fetchRandomAnime().catch((err) => {
+      return reply.status(404).send({ message: 'Anime not found' });
     });
+    reply.status(200).send(res);
+  });
 
   fastify.get('/servers/:id', async (request: FastifyRequest, reply: FastifyReply) => {
     const id = (request.params as { id: string }).id;
